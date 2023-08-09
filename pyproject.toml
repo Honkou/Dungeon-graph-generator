@@ -1,5 +1,22 @@
+[tool.pytest.ini_options]
+pythonpath = ["source", "tests"]
+filterwarnings = "ignore::DeprecationWarning"
+
+[tool.isort]
+line_length = 105
+profile = "black"
+skip_glob = "venv*"
+skip_gitignore = true
+
+[tool.black]
+line-length = 105
+
 [tool.ruff]
+line-length = 105
 select = ["ALL"]
 ignore = ["T201", # Ignore prints.
     "D211", "D213" # Ignore formatting conflicts.
     ]
+
+[tool.mypy]
+ignore_missing_imports = true

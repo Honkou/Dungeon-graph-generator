@@ -3,6 +3,10 @@ repos:
     rev: v4.4.0
     hooks:
     -   id: check-yaml
+    -   id: check-json
+    -   id: pretty-format-json
+    -   id: check-toml
+    -   id: requirements-txt-fixer
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/astral-sh/ruff-pre-commit
@@ -19,3 +23,7 @@ repos:
     rev: 23.7.0
     hooks:
     -   id: black
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.4.1'
+    hooks:
+    -   id: mypy
