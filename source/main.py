@@ -2,7 +2,7 @@
 from graph import NxGraph
 from pyvis.network import Network
 
-test_points = (1, 2, 3, 4, 5, 6)
+test_points = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 G = NxGraph()
 G.generate_graph(test_points)
 
