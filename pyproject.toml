@@ -15,7 +15,9 @@ line-length = 105
 line-length = 105
 select = ["ALL"]
 ignore = ["T201", # Ignore prints.
-    "D211", "D213" # Ignore formatting conflicts.
+    "D211", "D213", # Ignore formatting conflicts.
+    "ANN101",       # Missing type annotation for 'self' in method
+    "S311",         # Standard pseudo-random generators are not suitable for cryptographic purposes
     ]
 
 [tool.mypy]
