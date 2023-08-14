@@ -32,6 +32,10 @@ class Graph(ABC):
     def _find_proper_nodes(self, excluded: int) -> list:
         """Return all nodes that match certain conditions."""
 
+    @abstractmethod
+    def _add_missing_edges(self) -> None:
+        """Add missing edges for nodes with fewer edges than max_edges."""
+
 
 class NxGraph(Graph):
 
@@ -49,9 +53,11 @@ class NxGraph(Graph):
             self.graph.add_node(point, label=str(point), max_edges=max_edge)
 
             if self.graph.number_of_nodes() > 1:
-                edge_loop = random.randint(1, max_edge)
+                edge_loop = random.randint(1, max_edge - 1)
                 for _ in range(edge_loop):
                     self._add_legal_edge(point)
+
+        self._add_missing_edges()
 
     def _add_legal_edge(self, new_point: int) -> None:
         """Create a connection between a freshly created node and a random old one.
@@ -85,3 +91,22 @@ class NxGraph(Graph):
         if proper_nodes == []:
             raise NodeNotFoundError
         return proper_nodes
+
+    def _add_missing_edges(self) -> None:
+        """Add missing edges for nodes with fewer edges than max_edges."""
+        for node in self.graph.nodes:
+            max_edges = nx.get_node_attributes(self.graph, "max_edges")[node]
+            current_degree = self.graph.degree[node]
+            missing_edges = max_edges - current_degree
+
+            if missing_edges > 0:
+                try:
+                    free_nodes = self._find_proper_nodes(node)
+                except NodeNotFoundError:
+                    continue
+
+                num_edges_to_add = min(missing_edges, len(free_nodes))
+                nodes_to_connect = random.sample(free_nodes, num_edges_to_add)
+
+                for new_neighbor in nodes_to_connect:
+                    self.graph.add_edge(node, new_neighbor)
