@@ -7,6 +7,11 @@ from collections.abc import Iterable
 import networkx as nx
 
 
+class NodeNotFoundError(Exception):
+
+    """Exception to be raised when there are no valid nodes to return."""
+
+
 class Graph(ABC):
 
     """Class for creating and analyzing graphs."""
@@ -48,11 +53,11 @@ class NxGraph(Graph):
         """Create a connection between a freshly created node and a random old one.
 
         The random old node is determined by its availability.
-        If a node of id 0 is chosen, that means that there are no valid nodes
-        and no edge should be created.
+        If there are no valid nodes, then no edge should be created.
         """
-        random_node = random.choice(self.find_proper_nodes(new_point))
-        if random_node == 0:
+        try:
+            random_node = random.choice(self.find_proper_nodes(new_point))
+        except NodeNotFoundError:
             return
         self.graph.add_edge(new_point, random_node)
 
@@ -61,9 +66,9 @@ class NxGraph(Graph):
 
         The conditions are:
         - the node is not the excluded one (usually excluding itself in the loop),
-        - the node can have more edges creared, based on the max_edges property.
+        - the node can have more edges created, based on the max_edges property.
 
-        Returns a list containing only 0 if there are no nodes matching these conditions.
+        Raise an exception if there are no nodes matching these conditions.
         """
         proper_nodes = []
         for node in self.graph.nodes:
@@ -74,5 +79,5 @@ class NxGraph(Graph):
                 continue
             proper_nodes.append(node)
         if proper_nodes == []:
-            return [0]
+            raise NodeNotFoundError
         return proper_nodes
