@@ -53,11 +53,23 @@ class NxGraph(Graph):
             self.graph.add_node(point, label=str(point), max_edges=max_edge)
 
             if self.graph.number_of_nodes() > 1:
-                edge_loop = random.randint(1, max_edge - 1)
-                for _ in range(edge_loop):
-                    self._add_legal_edge(point)
-
+                self._add_close_connections(node=point, edge_treshold=max_edge)
         self._add_missing_edges()
+
+    def _add_close_connections(self, node: int, edge_treshold: int) -> None:
+        """Add edges from a node to somewhat closely neighbored nodes.
+
+        This takes for account:
+        - adding an edge to the previous node
+        - adding random ammount of connections to already generated nodes
+        - leaving at least one additional empty space for future connections
+        """
+        previous_node = node - 1
+        self.graph.add_edge(node, previous_node)
+        max_amount_of_loops = max(edge_treshold - 2, 1)
+        edge_loop = random.randint(1, max_amount_of_loops)
+        for _ in range(edge_loop):
+            self._add_legal_edge(node)
 
     def _add_legal_edge(self, new_point: int) -> None:
         """Create a connection between a freshly created node and a random old one.
