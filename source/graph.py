@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 
 import networkx as nx
+from randomize_option import randomize_function
 
 
 class NodeNotFoundError(Exception):
@@ -49,12 +50,18 @@ class NxGraph(Graph):
     def generate_graph(self, points: Iterable[int]) -> None:
         """Based on the points given, create nodes with edges."""
         for point in points:
-            max_edge = random.randint(2, self._EDGE_TRESHOLD)
+            max_edge = randomize_function(
+                self._generate_unique_edge_treshold,
+                self._generate_random_edge_treshold,
+                2,
+                point,
+            )
             self.graph.add_node(point, label=str(point), max_edges=max_edge)
 
             if self.graph.number_of_nodes() > 1:
                 self._add_close_connections(node=point, edge_treshold=max_edge)
         self._add_missing_edges()
+        print(nx.get_node_attributes(self.graph, "max_edges"))
 
     def _add_close_connections(self, node: int, edge_treshold: int) -> None:
         """Add edges from a node to somewhat closely neighbored nodes.
@@ -70,6 +77,21 @@ class NxGraph(Graph):
         edge_loop = random.randint(1, max_amount_of_loops)
         for _ in range(edge_loop):
             self._add_legal_edge(node)
+
+    def _generate_unique_edge_treshold(self, current_node: int) -> int:
+        """For a node, generate max number of connections different from the previous node."""
+        max_edge = random.randint(2, self._EDGE_TRESHOLD)
+        if current_node == 1:
+            return max_edge
+        previous_node = current_node - 1
+        previous_nodes_max = nx.get_node_attributes(self.graph, "max_edges")[previous_node]
+        while previous_nodes_max == max_edge:
+            max_edge = random.randint(2, self._EDGE_TRESHOLD)
+        return max_edge
+
+    def _generate_random_edge_treshold(self, current_node: int) -> int:  # noqa: ARG002
+        """For a node, generate max number of connections."""
+        return random.randint(2, self._EDGE_TRESHOLD)
 
     def _add_legal_edge(self, new_point: int) -> None:
         """Create a connection between a freshly created node and a random old one.
