@@ -17,15 +17,19 @@ class Graph(ABC):
     """Class for creating and analyzing graphs."""
 
     @abstractmethod
+    def __init__(self, max_edges: int) -> None:
+        """Initialize the class and assign a graph object."""
+
+    @abstractmethod
     def generate_graph(self, points: Iterable[int]) -> None:
         """Based on the given points, create nodes with edges."""
 
     @abstractmethod
-    def add_legal_edge(self, new_point: int) -> None:
+    def _add_legal_edge(self, new_point: int) -> None:
         """Create a connection between a freshly created node and an old one."""
 
     @abstractmethod
-    def find_proper_nodes(self, excluded: int) -> list:
+    def _find_proper_nodes(self, excluded: int) -> list:
         """Return all nodes that match certain conditions."""
 
 
@@ -33,10 +37,10 @@ class NxGraph(Graph):
 
     """Implementation of NetworkX library's graph."""
 
-    def __init__(self) -> None:
+    def __init__(self, max_edges: int = 4) -> None:
         """Initialize the class and assign a graph object."""
         self.graph = nx.Graph()
-        self._EDGE_TRESHOLD = 4
+        self._EDGE_TRESHOLD = max_edges
 
     def generate_graph(self, points: Iterable[int]) -> None:
         """Based on the points given, create nodes with edges."""
@@ -47,21 +51,21 @@ class NxGraph(Graph):
             if self.graph.number_of_nodes() > 1:
                 edge_loop = random.randint(1, max_edge)
                 for _ in range(edge_loop):
-                    self.add_legal_edge(point)
+                    self._add_legal_edge(point)
 
-    def add_legal_edge(self, new_point: int) -> None:
+    def _add_legal_edge(self, new_point: int) -> None:
         """Create a connection between a freshly created node and a random old one.
 
         The random old node is determined by its availability.
         If there are no valid nodes, then no edge should be created.
         """
         try:
-            random_node = random.choice(self.find_proper_nodes(new_point))
+            random_node = random.choice(self._find_proper_nodes(new_point))
         except NodeNotFoundError:
             return
         self.graph.add_edge(new_point, random_node)
 
-    def find_proper_nodes(self, excluded: int) -> list[int]:
+    def _find_proper_nodes(self, excluded: int | None = None) -> list[int]:
         """Return all nodes that match certain conditions.
 
         The conditions are:
