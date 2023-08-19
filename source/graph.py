@@ -68,13 +68,10 @@ class NxGraph(Graph):
         """Add edges from a node to somewhat closely neighbored nodes.
 
         This takes for account:
-        - adding an edge to the previous node
         - adding random ammount of connections to already generated nodes
         - leaving at least one additional empty space for future connections
         """
-        previous_node = node - 1
-        self.graph.add_edge(node, previous_node)
-        max_amount_of_loops = max(edge_treshold - 2, 1)
+        max_amount_of_loops = max(edge_treshold - 1, 1)
         edge_loop = random.randint(1, max_amount_of_loops)
         for _ in range(edge_loop):
             self._add_legal_edge(node)
