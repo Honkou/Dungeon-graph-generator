@@ -30,7 +30,7 @@ class Graph(ABC):
         """Create a connection between a freshly created node and an old one."""
 
     @abstractmethod
-    def _find_proper_nodes(self, excluded: int) -> list:
+    def _find_proper_nodes(self, current_node: int) -> list:
         """Return all nodes that match certain conditions."""
 
     @abstractmethod
@@ -106,19 +106,21 @@ class NxGraph(Graph):
             return
         self.graph.add_edge(new_point, random_node)
 
-    def _find_proper_nodes(self, excluded: int | None = None) -> list[int]:
+    def _find_proper_nodes(self, current_node: int | None = None) -> list[int]:
         """Return all nodes that match certain conditions.
 
         The conditions are:
-        - the node is not the excluded one (usually excluding itself in the loop),
-        - the node can have more edges created, based on the max_edges property.
+        - the node is not the current node,,
+        - the node doesn't already have a connection with the current node,
+        - the node can have more edges created with it, based on the max_edges property.
 
         Raise an exception if there are no nodes matching these conditions.
         """
         proper_nodes = []
         for node in self.graph.nodes:
             if (
-                node == excluded
+                node == current_node
+                or self.graph.has_edge(node, current_node)
                 or self.graph.degree[node] >= nx.get_node_attributes(self.graph, "max_edges")[node]
             ):
                 continue
