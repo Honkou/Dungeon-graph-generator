@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 
 import networkx as nx
-from randomize_option import randomize_function
+from randomize_option import Function, randomize_function
 
 
 class NodeNotFoundError(Exception):
@@ -50,11 +50,12 @@ class NxGraph(Graph):
     def generate_graph(self, points: Iterable[int]) -> None:
         """Based on the points given, create nodes with edges."""
         for point in points:
+            likely_func = Function(self._generate_unique_edge_treshold, (point,))
+            unlikely_func = Function(self._generate_random_edge_treshold)
             max_edge = randomize_function(
-                self._generate_unique_edge_treshold,
-                self._generate_random_edge_treshold,
+                likely_func,
+                unlikely_func,
                 2,
-                point,
             )
             self.graph.add_node(point, label=str(point), max_edges=max_edge)
 
@@ -89,7 +90,7 @@ class NxGraph(Graph):
             max_edge = random.randint(2, self._EDGE_TRESHOLD)
         return max_edge
 
-    def _generate_random_edge_treshold(self, current_node: int) -> int:  # noqa: ARG002
+    def _generate_random_edge_treshold(self) -> int:
         """For a node, generate max number of connections."""
         return random.randint(2, self._EDGE_TRESHOLD)
 
