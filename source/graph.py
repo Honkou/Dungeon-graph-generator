@@ -1,8 +1,10 @@
 """File for graph ABC and its implementations."""
 
+import json
 import random
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from pathlib import Path
 
 import networkx as nx
 from randomize_option import Function, randomize_function
@@ -24,6 +26,14 @@ class Graph(ABC):
     @abstractmethod
     def generate_graph(self, points: Iterable[int]) -> None:
         """Based on the given points, create nodes with edges."""
+
+    @abstractmethod
+    def save_to_file(self, path: Path) -> None:
+        """Save the generated graph to a local file."""
+
+    @abstractmethod
+    def read_from_file(self, path: Path) -> None:
+        """Read the saved file to a graph object."""
 
     @abstractmethod
     def _add_legal_edge(self, new_point: int) -> None:
@@ -55,14 +65,30 @@ class NxGraph(Graph):
             max_edge = randomize_function(
                 likely_func,
                 unlikely_func,
-                2,
+                chance=5,
             )
+
             self.graph.add_node(point, label=str(point), max_edges=max_edge)
 
             if self.graph.number_of_nodes() > 1:
                 self._add_close_connections(node=point, edge_treshold=max_edge)
+
         self._add_missing_edges()
         print(nx.get_node_attributes(self.graph, "max_edges"))
+
+    def save_to_file(self, path: Path) -> None:
+        """Save the generated graph to a local file."""
+        data = nx.readwrite.json_graph.node_link_data(self.graph)
+        serialized_data = json.dumps(data)
+        with Path(path).open("w") as file:
+            file.write(serialized_data)
+
+    def read_from_file(self, path: Path) -> None:
+        """Read the saved file to a graph object."""
+        with Path(path).open("r") as file:
+            serialized_data = file.read()
+        data = json.loads(serialized_data)
+        self.graph = nx.readwrite.json_graph.node_link_graph(data)
 
     def _add_close_connections(self, node: int, edge_treshold: int) -> None:
         """Add edges from a node to somewhat closely neighbored nodes.
